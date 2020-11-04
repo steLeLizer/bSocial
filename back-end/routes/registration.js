@@ -11,6 +11,7 @@ router.post('/register', (req, res) => {
     // I assume that the input data validation is done from front-end side
     const inputData = req.body;
 
+    // I am using raw queries to save time for now, I might implement sequalize later on
     const findUserQuery = "SELECT * FROM user WHERE username = ? OR email = ?";
 
     appNode.mysqlConnection.query(findUserQuery, [inputData.username, inputData.email], (err, result) => {
@@ -22,35 +23,42 @@ router.post('/register', (req, res) => {
                 // console.log(result);
                 res.status(401).send({message: 'User already exists.'});
             } else {
-                const sql = "INSERT INTO user (first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?)";
-                appNode.mysqlConnection.query(
-                    sql,
-                    [
-                        inputData.firstName,
-                        inputData.lastName,
-                        inputData.username,
-                        inputData.email,
-                        bcrypt.hashSync(inputData.password, saltRounds)
-                    ], (err) => {
-                        if (err) {
-                            console.log(err);
-                            res.status(500).send({message: err});
-                        } else {
-                            res.status(200).send({message: 'You have registered successfully!'});
-                            kafkaConfig.produce('bsocial', [{
-                                value: JSON.stringify({
-                                    userData: {
-                                        firstName: inputData.firstName,
-                                        lastName: inputData.lastName,
-                                        username: inputData.username,
-                                        email: inputData.email
-                                    },
-                                    registrationDate: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
-                                })
-                            }]).catch(console.error);
-                        }
+                bcrypt.hash(inputData.password, saltRounds, (err, hash) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).send({message: 'Server error, please try again later.'});
+                    } else {
+                        const sql = "INSERT INTO user (first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?)";
+                        appNode.mysqlConnection.query(
+                            sql,
+                            [
+                                inputData.firstName,
+                                inputData.lastName,
+                                inputData.username,
+                                inputData.email,
+                                hash
+                            ], (err) => {
+                                if (err) {
+                                    console.log(err);
+                                    res.status(500).send({message: err});
+                                } else {
+                                    res.status(200).send({message: 'You have registered successfully!'});
+                                    kafkaConfig.produce('bsocial', [{
+                                        value: JSON.stringify({
+                                            userData: {
+                                                firstName: inputData.firstName,
+                                                lastName: inputData.lastName,
+                                                username: inputData.username,
+                                                email: inputData.email
+                                            },
+                                            registrationDate: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+                                        })
+                                    }]).catch(console.error);
+                                }
+                            }
+                        );
                     }
-                );
+                });
             }
         }
     });
