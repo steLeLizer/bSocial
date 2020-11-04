@@ -23,9 +23,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 // Routes
 // Registration - /register
 // Login authentication - /login
-app.use('/', validatePayloadMiddleware, [require('./routes/registration').router, login.router]);
+app.use('/authentication', validatePayloadMiddleware, [require('./routes/registration').router, login.router]);
 
-app.use('/', verifyRefreshTokenMiddleware, [require('./routes/refreshToken').router]);
+app.use('/validation', verifyRefreshTokenMiddleware, require('./routes/refreshToken').router);
+
+app.use('/api', verifyAccessTokenMiddleware, [require('./routes/feed').router]);
 
 // Middleware functions
 // Check if payload (request data content) is present
@@ -48,12 +50,14 @@ function verifyAccessTokenMiddleware(req, res, next) {
 
         login.jwt.verify(req.token, login.accessTokenSecret, (err) => {
             if (err) {
+                console.log('aaa');
                 res.status(403).json({message: "Access denied!"});
             } else {
                 next();
             }
         });
     } else {
+        console.log('bbb');
         res.status(403).json({message: "Access denied!"});
     }
 }
@@ -67,12 +71,14 @@ function verifyRefreshTokenMiddleware(req, res, next) {
 
         login.jwt.verify(req.token, login.refreshTokenSecret, (err) => {
             if (err) {
+                console.log('ccc');
                 res.status(403).json({message: "Access denied!"});
             } else {
                 next();
             }
         });
     } else {
+        console.log('ddd');
         res.status(403).json({message: "Access denied!"});
     }
 }
