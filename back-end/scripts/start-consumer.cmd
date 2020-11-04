@@ -1,1 +1,1 @@
-kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test-topic --from-beginning
+kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic bsocial --from-beginning
