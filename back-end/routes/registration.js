@@ -6,12 +6,13 @@ const saltRounds = 10;
 const kafkaConfig = require('../kafka/config');
 const moment = require('moment');
 
-//User registration
+// User registration
 router.post('/register', (req, res) => {
-    // I assume that the input data validation is done from front-end using regex
+    // I assume that the input data validation is done from front-end side
     const inputData = req.body;
 
-    const findUserQuery = 'SELECT * FROM user WHERE username = ? OR email = ?';
+    const findUserQuery = "SELECT * FROM user WHERE username = ? OR email = ?";
+
     appNode.mysqlConnection.query(findUserQuery, [inputData.username, inputData.email], (err, result) => {
         if (err) {
             console.log(err);
@@ -21,7 +22,7 @@ router.post('/register', (req, res) => {
                 // console.log(result);
                 res.status(401).send({message: 'User already exists.'});
             } else {
-                const sql = 'INSERT INTO user (first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?)';
+                const sql = "INSERT INTO user (first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?)";
                 appNode.mysqlConnection.query(
                     sql,
                     [
