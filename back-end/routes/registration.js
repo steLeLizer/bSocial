@@ -3,6 +3,8 @@ const router = express.Router();
 const appNode = require('../app');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const kafkaConfig = require('../kafka/config');
+const moment = require('moment');
 
 //User registration
 router.post('/register', (req, res) => {
@@ -16,7 +18,7 @@ router.post('/register', (req, res) => {
             res.status(500).send({message: err});
         } else {
             if (result.length !== 0) {
-                console.log(result);
+                // console.log(result);
                 res.status(401).send({message: 'User already exists.'});
             } else {
                 const sql = 'INSERT INTO user (first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?)';
@@ -34,6 +36,17 @@ router.post('/register', (req, res) => {
                             res.status(500).send({message: err});
                         } else {
                             res.status(200).send({message: 'You have registered successfully!'});
+                            kafkaConfig.produce('bsocial', [{
+                                value: JSON.stringify({
+                                    userData: {
+                                        firstName: inputData.firstName,
+                                        lastName: inputData.lastName,
+                                        username: inputData.username,
+                                        email: inputData.email
+                                    },
+                                    registrationDate: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+                                })
+                            }]).catch(console.error);
                         }
                     }
                 );
