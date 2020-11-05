@@ -27,7 +27,7 @@ app.use('/authentication', validatePayloadMiddleware, [require('./routes/registr
 
 app.use('/validation', verifyRefreshTokenMiddleware, require('./routes/refreshToken').router);
 
-app.use('/api', verifyAccessTokenMiddleware, [require('./routes/feed').router]);
+app.use('/api', verifyAccessTokenMiddleware, [require('./routes/feed').router, require('./routes/profile').router]);
 
 // Middleware functions
 // Check if payload (request data content) is present
