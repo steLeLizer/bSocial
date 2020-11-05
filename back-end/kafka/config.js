@@ -6,7 +6,6 @@ const kafka = new Kafka({
 });
 
 const config = kafka.producer();
-const consumer = kafka.consumer({groupId: 'test-group'});
 
 const produce = async (topic, messages) => {
     // Producing
@@ -17,20 +16,4 @@ const produce = async (topic, messages) => {
     });
 };
 
-const consume = async (topic, fromBeginning) => {
-    // Consuming
-    await consumer.connect();
-    await consumer.subscribe({topic, fromBeginning});
-
-    await consumer.run({
-        eachMessage: async ({topic, partition, message}) => {
-            console.log({
-                partition,
-                offset: message.offset,
-                value: message.value.toString(),
-            })
-        },
-    })
-};
-
-module.exports = {produce, consume};
+module.exports = {produce};
