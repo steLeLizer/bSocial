@@ -3,7 +3,6 @@ const router = express.Router();
 const appNode = require('../app');
 const kafkaConfig = require('../kafka/config');
 const moment = require('moment');
-const login = require('./login');
 
 router.post('/feed-post', (req, res) => {
     const inputData = req.body;
@@ -59,11 +58,20 @@ router.post('/post-comment', (req, res) => {
             } else {
                 const checkFollowQuery = "SELECT user.* FROM user, post, follow " +
                     "WHERE (user.id = ? " +
+                    "AND post.id = ? " +
                     "AND post.user_id = user.id) " +
                     "OR (user.id = ? " +
+                    "AND post.id = ? " +
                     "AND follow.followed_user_id = (SELECT user_id FROM post WHERE id = ?) " +
                     "AND follow.follower_user_id = ?)";
-                appNode.mysqlConnection.query(checkFollowQuery, [inputData.userId, inputData.userId, inputData.postId, inputData.userId], (err, senderUser) => {
+                appNode.mysqlConnection.query(checkFollowQuery, [
+                    inputData.userId,
+                    inputData.postId,
+                    inputData.userId,
+                    inputData.postId,
+                    inputData.postId,
+                    inputData.userId
+                ], (err, senderUser) => {
                     if (err) {
                         console.log(err);
                         res.status(500).send({message: err});
