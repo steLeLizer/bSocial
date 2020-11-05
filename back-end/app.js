@@ -48,16 +48,19 @@ function verifyAccessTokenMiddleware(req, res, next) {
         const bearer = bearerHeader.split(' ');
         req.token = bearer[1];
 
-        login.jwt.verify(req.token, login.accessTokenSecret, (err) => {
+        login.jwt.verify(req.token, login.accessTokenSecret, (err, authData) => {
             if (err) {
-                console.log('aaa');
                 res.status(403).json({message: "Access denied!"});
             } else {
+                // In case someone tries to access certain api endpoint with a different user id,
+                // I am checking if the JWT is assigned to the correct user
+                if (authData.user[0].id !== req.body.userId) {
+                    return res.status(403).json({message: "Access denied, wrong user!"});
+                }
                 next();
             }
         });
     } else {
-        console.log('bbb');
         res.status(403).json({message: "Access denied!"});
     }
 }
@@ -69,16 +72,19 @@ function verifyRefreshTokenMiddleware(req, res, next) {
         const bearer = bearerHeader.split(' ');
         req.token = bearer[1];
 
-        login.jwt.verify(req.token, login.refreshTokenSecret, (err) => {
+        login.jwt.verify(req.token, login.refreshTokenSecret, (err, authData) => {
             if (err) {
-                console.log('ccc');
                 res.status(403).json({message: "Access denied!"});
             } else {
+                // In case someone tries to access certain api endpoint with a different user id,
+                // I am checking if the JWT is assigned to the correct user
+                if (authData.user[0].id !== req.body.userId) {
+                    return res.status(403).json({message: "Access denied, wrong user!"});
+                }
                 next();
             }
         });
     } else {
-        console.log('ddd');
         res.status(403).json({message: "Access denied!"});
     }
 }

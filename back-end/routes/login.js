@@ -34,14 +34,14 @@ router.post('/login', (req, res) => {
                     }
 
                     // assign access token
-                    jwt.sign({user}, accessTokenSecret, {expiresIn: '7d'}, (err, accessToken) => {
+                    jwt.sign({user}, accessTokenSecret, {expiresIn: '7d', header: {sub: user[0].id}}, (err, accessToken) => {
                         if (err) {
                             console.log(`Login JWT1 error: ${err}`);
                             return res.status(500).send({message: err});
                         }
 
                         // assign refresh token
-                        jwt.sign({user}, refreshTokenSecret, {expiresIn: '30d'}, (err, refreshToken) => {
+                        jwt.sign({user}, refreshTokenSecret, {expiresIn: '30d', header: {sub: user[0].id}}, (err, refreshToken) => {
                             if (err) {
                                 console.log(`Login JWT2 error: ${err}`);
                                 return res.status(500).send({message: err});
