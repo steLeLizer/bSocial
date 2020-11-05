@@ -7,7 +7,7 @@ const moment = require('moment');
 router.post('/feed-post', (req, res) => {
     const inputData = req.body;
 
-    const findUserQuery = "SELECT * FROM user WHERE id = ?";
+    const findUserQuery = "SELECT * FROM user WHERE id = ? AND status = 'active'";
     appNode.mysqlConnection.query(findUserQuery, [inputData.userId], (err, user) => {
         if (err) {
             console.log(err);
@@ -46,7 +46,7 @@ router.post('/feed-post', (req, res) => {
 router.post('/post-comment', (req, res) => {
     const inputData = req.body;
 
-    const findUserQuery = "SELECT * FROM user WHERE id = ?";
+    const findUserQuery = "SELECT * FROM user WHERE id = ? AND status = 'active'";
     appNode.mysqlConnection.query(findUserQuery, [inputData.userId], (err, user) => {
         if (err) {
             console.log(err);
@@ -113,7 +113,7 @@ router.post('/post-comment', (req, res) => {
 router.get('/feed', (req, res) => {
     const inputData = req.body;
 
-    const findUserQuery = "SELECT * FROM user WHERE id = ?";
+    const findUserQuery = "SELECT * FROM user WHERE id = ? AND status = 'active'";
     appNode.mysqlConnection.query(findUserQuery, [inputData.userId], (err, user) => {
         if (err) {
             console.log(err);
@@ -137,6 +137,65 @@ router.get('/feed', (req, res) => {
                         res.status(500).send({message: err});
                     } else {
                         res.status(200).send({message: 'Feed retrieved successfully!', data: result});
+                    }
+                });
+            }
+        }
+    });
+});
+
+router.get('/post-comments', (req, res) => {
+    const inputData = req.body;
+
+    const findUserQuery = "SELECT * FROM user WHERE id = ? AND status = 'active'";
+    appNode.mysqlConnection.query(findUserQuery, [inputData.userId], (err, user) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send({message: err});
+        } else {
+            if (user.length === 0) {
+                // console.log(result);
+                res.status(404).send({message: 'User not found.'});
+            } else {
+                const checkFollowQuery = "SELECT user.* FROM user, post, follow " +
+                    "WHERE (user.id = ? " +
+                    "AND post.id = ? " +
+                    "AND post.user_id = user.id) " +
+                    "OR (user.id = ? " +
+                    "AND post.id = ? " +
+                    "AND follow.followed_user_id = (SELECT user_id FROM post WHERE id = ?) " +
+                    "AND follow.follower_user_id = ?)";
+                appNode.mysqlConnection.query(checkFollowQuery, [
+                    inputData.userId,
+                    inputData.postId,
+                    inputData.userId,
+                    inputData.postId,
+                    inputData.postId,
+                    inputData.userId
+                ], (err, senderUser) => {
+                    if (err) {
+                        console.log(err);
+                        res.status(500).send({message: err});
+                    } else {
+                        // console.log(senderUser[0].username);
+                        if (senderUser.length === 0) {
+                            return res.status(401).send({message: 'You are not following this user.'});
+                        }
+                        // I added LIMIT and OFFSET to the query for loading more comments on-demand
+                        const sql = "SELECT comment.* FROM comment " +
+                            "LEFT JOIN post ON comment.post_id = post.id " +
+                            "WHERE post.id = ? " +
+                            "ORDER BY comment.timestamp DESC " +
+                            "LIMIT ? " +
+                            "OFFSET ?";
+                        appNode.mysqlConnection.query(sql, [inputData.postId, inputData.limit, inputData.offset], (err, result) => {
+                            if (err) {
+                                console.log(err);
+                                res.status(500).send({message: err});
+                            } else {
+                                res.status(200).send({message: 'Comments retrieved successfully!', data: result});
+                            }
+                        });
                     }
                 });
             }

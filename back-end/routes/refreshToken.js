@@ -6,7 +6,7 @@ const login = require('./login');
 router.post('/refresh-token', (req, res) => {
     const username = req.body.username;
 
-    appNode.mysqlConnection.query("SELECT * FROM user WHERE username = ?", [username], (err, user) => {
+    appNode.mysqlConnection.query("SELECT * FROM user WHERE username = ? AND status = 'active'", [username], (err, user) => {
         if (err) {
             console.log(err);
             res.status(500).send({message: err});
