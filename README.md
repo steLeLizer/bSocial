@@ -4,6 +4,7 @@ Run command "npm start" (or "nodemon app.js" if you have nodemon installed globa
 (Make sure kafka is running locally)
 
 API endpoints testing examples:
+(I am using Postman for testing)
 
 http://localhost:3000/authentication/register
 BODY:
