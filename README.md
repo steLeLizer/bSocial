@@ -1,3 +1,8 @@
+Run "npm i" while in "bSocial/back-end/" directory to install dependencies.
+
+Run command "npm start" (or "nodemon app.js" if you have nodemon installed globally) while in "bSocial/back-end/" directory to start the app.
+(Make sure kafka is running locally)
+
 API endpoints testing examples:
 
 http://localhost:3000/authentication/register
