@@ -1,3 +1,12 @@
+App ports:
+bSocial - http://localhost:3000/
+Kafka - http://localhost:9092/
+Elasticsearch - http://localhost:9200/
+
+Scripts that are executed for Kafka to work are in the "scripts/" directory.
+(topic "bsocial" needs to be created before testing the app)
+(I am using windows on my home pc which is why they are .cmd files)
+
 Run "npm i" while in "bSocial/back-end/" directory to install dependencies.
 
 Run command "npm start" (or "nodemon app.js" if you have nodemon installed globally) while in "bSocial/back-end/" directory to start the app.
