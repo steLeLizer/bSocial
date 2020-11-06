@@ -4,6 +4,7 @@ const app = express();
 const database = require('./config/database');
 const mysqlConnection = mysql.createConnection(database.mysql);
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 mysqlConnection.connect((err) => {
     if (!err) {
@@ -19,6 +20,9 @@ const login = require('./routes/login');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+// I enabled all CORS requests for testing purposes
+app.use(cors());
 
 // Routes
 app.use('/authentication', validatePayloadMiddleware, [
