@@ -3,6 +3,8 @@ bSocial - http://localhost:3000/
 Kafka - http://localhost:9092/
 Elasticsearch - http://localhost:9200/
 
+Mysql database dump file is in the "back-end/dump" directory.
+
 Scripts that are executed for Kafka to work are in the "scripts/" directory.
 (topic "bsocial" needs to be created before testing the app)
 (I am using windows on my home pc which is why they are .cmd files)
