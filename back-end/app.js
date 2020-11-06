@@ -21,11 +21,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 // Routes
-app.use('/authentication', validatePayloadMiddleware, [require('./routes/registration').router, login.router]);
+app.use('/authentication', validatePayloadMiddleware, [
+    require('./routes/registration').router,
+    login.router
+]);
 
 app.use('/validation', verifyRefreshTokenMiddleware, require('./routes/refreshToken').router);
 
-app.use('/api', verifyAccessTokenMiddleware, [require('./routes/feed').router, require('./routes/profile').router]);
+app.use('/api', verifyAccessTokenMiddleware, [
+    require('./routes/feed').router,
+    require('./routes/profile').router,
+    require('./routes/notifications').router
+]);
 
 app.use('/micro-service', verifyMicroserviceMiddleware, [require('./micro-services-endpoint/notifications').router]);
 
