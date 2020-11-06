@@ -21,13 +21,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 // Routes
-// Registration - /register
-// Login authentication - /login
 app.use('/authentication', validatePayloadMiddleware, [require('./routes/registration').router, login.router]);
 
 app.use('/validation', verifyRefreshTokenMiddleware, require('./routes/refreshToken').router);
 
 app.use('/api', verifyAccessTokenMiddleware, [require('./routes/feed').router, require('./routes/profile').router]);
+
+app.use('/micro-service', verifyMicroserviceMiddleware, [require('./micro-services-endpoint/notifications').router]);
 
 // Middleware functions
 // Check if payload (request data content) is present
@@ -84,6 +84,26 @@ function verifyRefreshTokenMiddleware(req, res, next) {
                 next();
             }
         });
+    } else {
+        res.status(403).json({message: "Access denied!"});
+    }
+}
+
+// Middleware for microservices
+// Only using this simplified way to save time,
+// otherwise I would use jwt or something else if instructed
+function verifyMicroserviceMiddleware(req, res, next) {
+    const bearerHeader = req.headers['authorization'];
+
+    if (typeof bearerHeader !== 'undefined') {
+        const bearer = bearerHeader.split(' ');
+        req.token = bearer[1];
+
+        if (req.token !== '@#*ey974as93NalMLGasdf3632SL$#!') {
+            res.status(403).json({message: "Access denied!"});
+        } else {
+            next();
+        }
     } else {
         res.status(403).json({message: "Access denied!"});
     }
